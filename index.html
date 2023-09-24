@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МСіП</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('img/photo.png'); 
+            background-size: cover; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+        }
+
+        h1 {
+            color: #353535;
+            font-family: Corbel;
+            font-size: 200%;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            max-width: 800px; 
+            margin: auto; 
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 15px; 
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); 
+            background-color: white;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; 
+        }
+
+        #intermediateResults {
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: "Arial", sans-serif;
+            line-height: 170%;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #000000;
+        }
+
+        label {
+            text-align: left; 
+            display: inline-block; 
+            width: 45%; 
+            margin-right: 10px; 
+            margin-bottom: 15px; 
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="number"] + label {
+            border: 1px solid #ccc;
+            border-radius: 10px; 
+            padding: 6px; 
+            width: 45%; 
+            margin-bottom: 15px; 
+            vertical-align: top;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор народонаселення</h1>
+        <form id="populationCalculator">
+            <label for="year0">Рік початку дослідження:</label>
+            <input type="number" id="year0" required>
+            <br><br>
+            <label for="population0">Населення в початковому році:</label>
+            <input type="text" id="population0" required>
+            <br><br>
+            <label for="year1">Рік завершення дослідження:</label>
+            <input type="number" id="year1" required>
+            <br><br>
+            <label for="population1">Населення в кінцевому році:</label>
+            <input type="text" id="population1" required>
+            <br><br>
+            <button type="button" onclick="calculatePopulation()">Розрахувати</button>
+        </form>
+        <div id="result"></div>
+        <div id="intermediateResults"></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function calculatePopulation() {
+            const year0 = parseInt(document.getElementById("year0").value);
+            const population0 = parseInt(document.getElementById("population0").value.replace(/ /g, ''));
+            const year1 = parseInt(document.getElementById("year1").value);
+            const population1 = parseInt(document.getElementById("population1").value.replace(/ /g, ''));
+
+            if (!year0 || isNaN(population0) || !year1 || isNaN(population1)) {
+                alert("Будь ласка, заповніть всі поля перед розрахунком!");
+                return;
+            }
+
+            if (year0 >= year1 || population0 >= population1 || year0 <= 0 || year1 <= 0 || population0 <= 0 || population1 <= 0) {
+                alert("При введенні даних допущено помилку, спробуйте ще раз!");
+                document.getElementById("year0").value = "";
+                document.getElementById("population0").value = "";
+                document.getElementById("year1").value = "";
+                document.getElementById("population1").value = "";
+                return;
+            }
+
+            const population0Thousands = Math.floor(population0 / 1000000);
+            const population1Thousands = Math.floor(population1 / 1000000);
+
+            const n = year1 - year0;
+            const k = Math.log(population1Thousands / population0Thousands) / n;
+            const t = Math.log(40000 / population1Thousands) / k;
+
+            const resultYear = year1 + Math.round(t);
+
+            if (isNaN(n) || isNaN(k) || isNaN(t) || isNaN(resultYear)) {
+                alert("Неможливо порахувати при таких даних, спробуйте ще раз!");
+                return;
+            }
+
+            const intermediateResults = `
+                Різниця в роках: <strong>${n}</strong>.<br>
+                Коефіцієнт (k): <strong>${k.toFixed(4)}</strong>.<br>
+                Значення (t) - заокруглене: <strong>${Math.round(t)}</strong>.<br>
+                Ресурси будуть виснажені в <strong>${resultYear}</strong> році.
+            `;
+
+            document.getElementById("intermediateResults").innerHTML = intermediateResults;
+        }
+
+        function digits_int(target) {
+            val = $(target).val().replace(/[^0-9]/g, '');
+            val = val.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            $(target).val(val);
+        }
+
+        $(function($) {
+            $('#population0').on('input', function(e) {
+                digits_int(this);
+            });
+
+            $('#population1').on('input', function(e) {
+                digits_int(this);
+            });
+        });
+    </script>
+</body>
+</html>
